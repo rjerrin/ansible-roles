@@ -1,0 +1,13 @@
+server_name: "test.dev"
+root_dir:     "/usr/local/www/wordpress"
+user:         "www"
+worker_processes: 1
+DB_NAME:      "dbname"
+DB_USER:      "dbuser"
+DB_PASSWORD:  "dbpass" 
+DB_HOST:       "dbhost"
+wp_version:  4.6.1
+ssl_dir:       "/usr/local/etc/nginx"
+cert_file:    "cert.pem"
+key_file:     "cert.key"
+

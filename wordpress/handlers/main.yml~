@@ -1,0 +1,8 @@
+- name: restart nginx
+  service: nginx
+  state: restarted
+
+
+- name: restart php-fpm
+  service: php-fpm
+  state: restarted

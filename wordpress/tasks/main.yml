@@ -1,0 +1,66 @@
+- name: install nginx 
+  pkgng: name=nginx  
+  
+- name:  install php56
+  pkgng: name=php56  
+    
+- name:  install php56-extensions  
+  pkgng: name=php56-extensions,php56-mysql,php56-mysqli,php56-curl,php56-zlib  state=present
+
+- name:  install wget 
+  pkgng: name=wget state=present
+
+- name: gtar install
+  pkgng: name=gtar state=present
+
+- name: Create directories
+  file:  path={{root_dir}}  state=directory mode=0755 owner=www group=www
+
+- name: nginx ssl directories
+  file: path={{ssl_dir}}  state=directory mode=0755  owner=www group=www
+
+- name: copy ssl cert 
+  copy: src={{cert_file}} dest={{ssl_dir}}/{{cert_file}}  mode=0400 owner=www group=www
+
+- name: copy ssl key 
+  copy: src={{key_file}}  dest={{ssl_dir}}/{{key_file}}  mode=0400 owner=www group=www
+
+- name: configure php-fpm 
+  template:  src=templates/php-fpm.j  dest=/usr/local/etc/php-fpm.conf 
+  notify:
+    - restart php-fpm 
+ 
+- name: configure nginx 
+  template: src=templates/nginx-php-fpm.j dest=/usr/local/etc/nginx/nginx.conf 
+  notify:
+    - restart nginx 
+
+- name: configure php.ini
+  template: src=templates/php.ini.j     dest=/usr/local/etc/php.ini
+  notify:
+    - restart php-fpm
+
+
+- name: wp install
+  unarchive:
+   src: "https://wordpress.org/wordpress-{{wp_version}}.tar.gz"
+   dest: /usr/local/www/
+   remote_src: yes
+    
+- name: delete readme.html
+  file: path={{root_dir}}/readme.html state=absent
+    
+- name: enable  php-fpm service
+  lineinfile:
+    dest=/etc/rc.conf
+    line='php_fpm_enable="YES"'
+    
+
+- name: enable php-fpm and nginx  
+  lineinfile:
+    dest=/etc/rc.conf
+    line='nginx_enable="YES"'
+
+  
+
+
