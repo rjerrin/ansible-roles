@@ -1,0 +1,40 @@
+- name: add repository 
+  template: src=repo.j  dest=/etc/yum.repos.d/virt7-docker-common-release.repo
+
+- name : install kubernetes and selinux-python
+  yum: name={{item}} enablerepo=virt7-docker-common-release  state=present
+  with_items:
+     - kubernetes
+     - etcd
+     - flannel
+     - libselinux-python
+
+- name : disable firewall 
+  service: name=firewalld state=stopped enabled=no
+
+- name: disable selinux
+  selinux: state=disabled
+
+- name : configure kubernetes
+  template: src=config.j  dest=/etc/kubernetes/config
+
+- name: configure kubelet
+  template: src=kubelet.j  dest=/etc/kubernetes/kubelet
+
+- name: configure flanneld
+  template: src=flanneld.j  dest=/etc/sysconfig/flanneld
+
+- name: start kubernet services
+  service: name={{item}} state=started enabled=yes
+  with_items: 
+       - kube-proxy
+       - kubelet
+       - flanneld
+       - docker
+
+
+
+
+
+
+

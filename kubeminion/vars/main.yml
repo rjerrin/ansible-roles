@@ -1,0 +1,10 @@
+etcd_server: "172.30.37.143"
+kube_master: "172.30.37.143"
+etcd_name: "default"
+etcd_datadir: "/var/lib/etcd/default.etcd"
+etcd_lcu: "http://0.0.0.0:2379"
+etcd_aclu: "http://0.0.0.0:2379"
+ip_kubservice: "10.254.0.1"
+     
+
+      
