@@ -1,1 +1,52 @@
-- name :
+- name: add repository 
+  template: src=repo.j  dest=/etc/yum.repos.d/virt7-docker-common-release.repo
+
+- name : install kubernetes
+  yum: name={{item}} enablerepo=virt7-docker-common-release  state=present
+  with_items:
+     - kubernetes
+     - etcd
+     - flannel
+
+- name : configure etcd
+  template: src=etcd.j   dest=/etc/etcd/etcd.conf
+
+- name : configure kubernetes
+  template: src=config.j  dest=/etc/kubernetes/config
+
+- name : make ca certificates
+  script: /etc/ansible/roles/kubemaster/scripts/make-ca-certs.sh "{{kube_master}}" "IP:{{kube_master}},IP:{{ip_kubservice}},DNS:kubernetes,DNS:kubernetes.default,DNS:kubernetes.default.svc,DNS:kubernetes.default.svc.cluster.local"    creates=/srv/kubernetes/ca.crt
+ 
+- name: configure api server
+  template: src=apiserver.j dest=/etc/kubernetes/apiserver
+
+- name: configure control-manager
+  template: src=controller-manager.j   dest=/etc/kubernetes/kubelet  
+
+- name: start etcd service
+  service: name=etcd state=started
+
+- name: mkdir kube-centos network
+  command: etcdctl mkdir /kube-centos/network  creates=/kube-centos/network
+
+- name: define network configuration for flannerl
+  script: /etc/ansible/roles/kubemaster/scripts/flannet.sh
+
+- name: configure flanneld
+  template: src=flanneld.j  dest=/etc/sysconfig/flanneld
+
+- name: start kubernet services
+  service: name={{item}} state=started
+  with_items: 
+       - kube-apiserver
+       - kube-controller-manager
+       - kube-scheduler
+       - flanneld
+
+
+
+
+
+
+
+

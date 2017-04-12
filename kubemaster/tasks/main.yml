@@ -7,6 +7,13 @@
      - kubernetes
      - etcd
      - flannel
+     - libselinux-python
+
+- name : disable firewall
+  service: name=firewalld state=stopped enabled=no
+
+- name: disable selinux
+  selinux: state=disabled
 
 - name : configure etcd
   template: src=etcd.j   dest=/etc/etcd/etcd.conf
@@ -21,7 +28,7 @@
   template: src=apiserver.j dest=/etc/kubernetes/apiserver
 
 - name: configure control-manager
-  template: src=controller-manager.j   dest=/etc/kubernetes/kubelet  
+  template: src=controller-manager.j   dest=/etc/kubernetes/controller-manager
 
 - name: start etcd service
   service: name=etcd state=started
@@ -36,7 +43,7 @@
   template: src=flanneld.j  dest=/etc/sysconfig/flanneld
 
 - name: start kubernet services
-  service: name={{item}} state=started
+  service: name={{item}} state=started enabled=yes
   with_items: 
        - kube-apiserver
        - kube-controller-manager
