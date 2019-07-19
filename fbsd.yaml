@@ -1,0 +1,42 @@
+- hosts: fbsd
+
+  tasks:
+
+  - name: Upgrade FreeBSD packages
+    shell: pkg upgrade -y
+    register: result_pkg
+    changed_when: "'Your packages are up to date' not in result_pkg.stdout"
+
+  - debug: var=result_pkg
+    when: result_pkg.changed
+
+  - name: FreeBSD update fetch
+    shell: freebsd-update fetch
+
+  - name: FreeBSD update install
+    shell: freebsd-update install
+
+  - name: rc.conf
+    copy:
+      src: /root/rc.conf
+      dest: /etc/rc.conf
+      owner: root
+      group: wheel
+      mode: '0644'
+
+  - name: rc.conf
+    copy:
+      src: /root/loader.conf
+      dest: /boot/loader.conf
+      owner: root
+      group: wheel
+      mode: '0644'
+
+  - name: Start service sshd
+    service:
+      name: sshd
+      state: started
+
+
+    
+
